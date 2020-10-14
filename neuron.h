@@ -5,7 +5,7 @@ class Neuron
 private:
     int inputSize;
     float* inputWeights;
-    float* inputBias;
+    float bias;
 
 public:
     Neuron(int inputSize);
