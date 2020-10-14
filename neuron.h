@@ -4,17 +4,19 @@ class Neuron
 {
 private:
     int inputSize;
-    float* inputWeights;
-    float bias;
+    double* inputWeights;
+    double bias;
 
 public:
     Neuron(int inputSize);
     ~Neuron();
 
-    float activate(float* inputs);
-    void train(float* inputs, float target, float learningRate);
+    double activate(double* inputs);
+    void train(double* inputs, double target, double learningRate);
+
+    double getLineY(double x);
 
 private:
-    float activationFunction(float value);
+    double activationFunction(double value);
 
 };

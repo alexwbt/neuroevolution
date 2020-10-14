@@ -4,25 +4,26 @@
 
 #include "neuron.h"
 
-constexpr float SIZE = 600.0f;
+constexpr double SIZE = 600.0;
 
-float mapX(float x)
+double mapX(double x)
 {
-    return (x + 1.0f) * SIZE / 2.0f;
+    return (x + 1.0f) * SIZE / 2.0;
 }
 
-float mapY(float y) {
-    return (-y + 1.0f) * SIZE / 2.0f;
+double mapY(double y) {
+    return (-y + 1.0f) * SIZE / 2.0;
 }
 
 struct Point
 {
     sf::CircleShape shape;
-    float x, y;
-    Point(float x, float y) : shape(3, 6), x(x), y(y)
+    double x, y;
+    bool label;
+    Point(double x, double y, bool label) : shape(3, 6), x(x), y(y), label(label)
     {
         shape.setPosition(mapX(x), mapY(y));
-        shape.setFillColor(sf::Color::White);
+        shape.setFillColor(label ? sf::Color::Red : sf::Color::Blue);
     }
 };
 
@@ -33,7 +34,7 @@ int main()
     sf::RenderWindow window(sf::VideoMode(SIZE, SIZE), "Neuralevolution");
 
     // Single layer perceptrons are only capable of learning linearly separable patterns.
-    Neuron neuron(1);
+    Neuron neuron(2);
     std::vector<Point*> points;
 
     while (window.isOpen())
@@ -45,10 +46,10 @@ int main()
             {
             case sf::Event::MouseButtonPressed:
                 points.push_back(new Point(
-                    (event.mouseButton.x - SIZE / 2.0f) / (SIZE / 2.0f),
-                    -(event.mouseButton.y - SIZE / 2.0f) / (SIZE / 2.0f)
+                    (event.mouseButton.x - SIZE / 2.0) / (SIZE / 2.0),
+                    -(event.mouseButton.y - SIZE / 2.0) / (SIZE / 2.0),
+                    event.mouseButton.button == 0
                 ));
-                std::cout << points[points.size() - 1]->x << ' ' << points[points.size() - 1]->y << std::endl;
                 break;
             case sf::Event::Closed:
                 window.close(); 
@@ -60,19 +61,15 @@ int main()
 
         for (Point* pt : points)
         {
-            float input[] = { pt->x };
-            neuron.train(input, pt->y, 0.001f);
+            double input[] = { pt->x, pt->y };
+            neuron.train(input, pt->label ? 1.0 : -1.0, 0.5);
             window.draw(pt->shape);
         }
 
-        float input1[] = { -1.0f };
-        float input2[] = { 1.0f };
-        float y1 = neuron.activate(input1);
-        float y2 = neuron.activate(input2);
         sf::Vertex line[] =
         {
-            sf::Vertex(sf::Vector2f(mapX(input1[0]), mapY(y1))),
-            sf::Vertex(sf::Vector2f(mapX(input2[0]), mapY(y2)))
+            sf::Vertex(sf::Vector2f(mapX(-1.0), mapY(neuron.getLineY(-1.0)))),
+            sf::Vertex(sf::Vector2f(mapX(1.0), mapY(neuron.getLineY(1.0))))
         };
         window.draw(line, 2, sf::Lines);
         window.display();

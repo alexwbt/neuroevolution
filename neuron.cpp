@@ -6,9 +6,9 @@ Neuron::Neuron(int inputSize)
     : inputSize(inputSize), bias(0)
 {
     // initialize weights randomly
-    inputWeights = new float[inputSize];
+    inputWeights = new double[inputSize];
     for (int i = 0; i < inputSize; i++)
-        inputWeights[i] = (float)(rand() % 20000) / 10000.0f - 1.0f;
+        inputWeights[i] = (double)(rand() % 20000) / 10000.0 - 1.0;
 }
 
 Neuron::~Neuron()
@@ -16,25 +16,33 @@ Neuron::~Neuron()
     delete[] inputWeights;
 }
 
-float Neuron::activate(float* inputs)
+double Neuron::activate(double* inputs)
 {
-    float output = 0;
+    double output = 0;
     for (int i = 0; i < inputSize; i++)
-        output += inputs[i] * inputWeights[i];
-    return activationFunction(output) + bias;
+        output += inputs[i] * inputWeights[i] + bias;
+    return activationFunction(output);
 }
 
-float Neuron::activationFunction(float x)
+double Neuron::activationFunction(double x)
 {
-    return 1.0f / (1.0f + exp(-x));
+    // return 1.0 / (1.0 + exp(-x)); // sigmoid
+    // return x > 0 ? 1.0 : -1.0; // step
+    return x;
 }
 
-void Neuron::train(float* inputs, float target, float learningRate)
+void Neuron::train(double* inputs, double target, double learningRate)
 {
-    float result = activate(inputs);
-    float error = target - result;
+    double result = activate(inputs);
+    double error = target - result;
 
     bias += error * learningRate;
     for (int i = 0; i < inputSize; i++)
         inputWeights[i] += error * inputs[i] * learningRate;
+}
+
+// Calculate the Decision Boundary of a Single Perceptron - Visualizing Linear Separability
+double Neuron::getLineY(double x)
+{
+    return (-(bias / inputWeights[1]) / (bias / inputWeights[0])) * x + (-bias / inputWeights[1]);
 }
